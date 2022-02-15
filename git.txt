@@ -1,0 +1,44 @@
+Git
+	Tool for Version Control 
+
+what is is Version Control?
+	To keep track of code from the developer
+	1.Keep Tracking the code
+	2.Synchronise code
+
+Code
+	1.remote repositroy [Git and Github]
+	2.Local repositroy [Hard disk]
+
+Local repositroy:
+	Git Client need to be connected with remote platform
+	Your public SSH key must be added to the remote platform
+
+	1. Get clone "URL"  		$git clone "url"
+	2. Get you public key		$SSH Keygen
+	3. Paste the SSh into Github or Gitlab
+	4. To view the key 			$cat ~/.ssh/id_rsa.pub or $cat /c/user/val/ssh/id_rsa
+	5. $git config --global user.name "ragesh"
+	6. $git config --global user.email "ragesh@gmail.com"
+ 
+ 
+ Git commands
+	$git init				[initializes a new git repositroy,if you want to place a project]
+	$git clone				[Creat a copy of existing git repositroy from remote]
+	$git add .				[moves changes from the working directory to the stage area]
+	$git branch				[Your "Head" point]
+	$git checkout			[navigate to existing branch]
+	$git clean				[Remove untracked file from working directory]
+	$git commit				[Take the stage snapshot and commit to the project]
+	$git commit -- amend 	[rewriting history]
+	$git config				[way the set configure option for your git installation]
+	$git fetch				[fetching download a branch from another repositroy]
+	$git log				[it let to explore history revision of a project]
+	$git pull				[Pulling is the automated version of git fetch, it download a branch from a remote repositroy]
+	$git push				[it lets you move you local branch  to another repositroy]
+	$git rebase				[rebasing let you move branch around,which help you avoid unnecessary merge commit]
+	$git reflog				[git keeps track of update to the tip of branch using a mechanism called reflog,allows you to go back to changesets]
+	$git reset				[undoes changes to file in the working directory.resetting lets you cleanup]
+	$git revert				[undoes the committed snapshot,reverting a faulty commit]
+	$git status				[Display the state of the working directory]
+	$git merge				[lets you to put back together again]
