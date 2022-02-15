@@ -1,0 +1,23 @@
+apiVersion:
+kind:
+metadata:
+    name: nginx
+    lables:
+      app: nginx
+spec:
+  replicas: 3
+  selectors:
+    matchLables:
+        app: nginx
+template:
+  metadata:
+    name: nginx
+    lables:
+      app: nginx
+  spec:
+    containers:
+      - name: nginx-container
+        image: nginx
+    ports:
+      - containerPort: 80
+      
