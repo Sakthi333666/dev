@@ -1,0 +1,365 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: envvars-multiple-secrets
+spec:
+  containers:
+  - name: envars-test-container
+    image: nginx
+    env:
+    - name: BACKEND_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: backend-user
+          key: backend-username
+    - name: DB_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: db-user
+          key: db-username
+
+---
+#------Deployment---------#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx 
+    #---------matching lables / replicas------#
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+      #----------Pod-----------#
+  template:
+    metadata:
+      labels:
+        app: nginx
+        #-------containers docker images-------#
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.14.2
+        ports:
+        - containerPort: 80
+        #-------volumemount--------#
+        volumeMount:
+        - mouthPath: /test-ebs
+          name: test-volume
+
+---
+#services
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  selector:
+    app: nginx
+  ports:
+    - protocol: TCP 
+      port: 80          #Service port is arbitrary
+      targetPort: 3000  # targetport must match the port, the container is listening at !
+--- 
+#muiltport Service
+apiVersion: v1
+name: service
+metadata:
+    name: mongodb-service
+spec:
+    selector:
+        app: mongodb
+    ports:
+        - name: mongodb              #name must be added
+        protocol: TCP
+        port: 80
+        targetPort: 3000
+        - name: mongobd-exporter    #name must be added
+        protocol: TCP
+        port: 3001
+        targetPort: 3001
+        
+---
+#headless Service
+apiVersion: v1
+kind: Service 
+metadata:
+    name: mongodb-service-headless
+spec:
+  clusterIP: None #DNS Lookup Service 
+  selector:
+    app: mongodb
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
+      NodePort: 32767
+
+---      
+# clusterIP / Nodeport / LoadBalancer
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  type: ClusterIP / NodePort / LoadBalancer 
+  selector:
+    app: microservice-one
+  ports:
+    - portocol: TCP
+      port: 3200 #2
+      targetPort: 3000 #3
+      NodePort: 30010 #1
+
+---
+#Ingree
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: my-app-ingress
+spec:
+#routing rules
+  rules:
+  - host: myapp.com
+    http:
+      paths:
+      - backend:
+            serviceName: myapp-internal-service
+            servicePort: 8000
+
+
+
+---
+#----ingress----#
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+    name: myapp-ingress
+spec:
+    rules: #routing rules
+    -host: myapp.com #forward request to the internal service  - vaild domain ip address
+    http: # Step: incoming request gets forwated to internal service
+        paths: /payment #the URL path http://my-app.com/payment
+        - backend:
+            serviceName: myapp-internal-service #should match in internal
+            servicePort: 8080 #should match internal port:8000
+
+---
+#ingress and internal service configration
+apiVersion: v1
+kind: service
+metadata:
+    name: myapp-internal-service #should match in ingress
+spec:
+    selector:
+    app: myapp  
+ports:
+    - protocol: TCP 
+      port: 8080 
+
+#Ingress Controlller
+  #-evalutes all the rules
+  #-manages redirections
+  #-entrypoint to cluster
+---
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mypod
+spec:
+    containers:
+    - name: myfront-end
+      image: nginx
+    #---Mounted into container  
+      volumeMounts:
+        - mountPath: "/var/www/html"
+          name: mypod
+    #-----pod level-----#
+    volume:
+        - name : mypod
+          persistentVolumeClaim:
+            claimName: pvc-name
+ #Claims must be in the same namespace!!!
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pvc-name
+spec:
+  storageClassName: manual
+  volumeMode: filesystem
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+        storage: 10Gi
+---
+apiVersion: v1
+kind: volume
+metadata:
+    name: volume
+spec:
+    containers:
+        - image: elastic:latest
+          name: elastic-container
+          ports:
+          - containerPort: 9200
+          volumeMounts:
+           - name: es-persistent-storage
+             mouthPath: /var/lib/data
+           - name: es-secret-dir
+             mouthPath: /var/lib/secret
+           - name: es-config-dir
+             mouthPath: /var/lib/config
+    volumes:
+        - name: es-persistent-storage
+          persistentVolumeClaim:
+            claimName: es-pv-claim
+        - name: es-secret-dir
+            secret:
+                secretName: es-secert
+        -name: es-config-dir
+         configMap:
+            name: es-config-map
+---
+apiVersio: storage.k8s.io/v1
+kind: StorageClass
+metadta:
+    name: storage-class-name
+provisioner: kubernete.io/aws-ebs
+parameters:
+    type: io1
+    iopsPerGB: "10"
+    fsType: ext4
+
+---
+#----------configMap---------------#
+ConfigMaps play a key role in
+        - Decoupling of configuration and images
+        - Protability of containers
+        - Dev Instance / UAT Instance / Prodution Instance
+    create-
+     - From Files & folder      --from-file
+     - From Literals            -- from-literal
+     - mounting ConfigMaps as Volumes
+     - gaming.properties file
+kubectl get configmaps
+        -checking any Configmap is there 
+kubectl create configmap <myconfig> --from-file=<gaming.properties>
+
+How to create configmap for all files inside a folder?
+
+give the properties folder name instead of the individual file name
+kubectl create configmap myconfig-02 --from-file=.
+
+Creating Configmaps using literals?
+
+kubectl create configmap literal-config --from-literal=mykey=myval
+            -if you need another value --from-literal=myName=ragesh
+
+apiVersion: v1
+kind: configMap
+metadata:
+    name: spec-configmap
+data:
+---
+apiVersion: v1
+kind: configMap
+metadata:
+    name: mongodb-configmap
+data:
+    db-host: mongodb-service
+---
+apiVersion: v1
+kind: secret
+metadata:
+    name: mongodb-secret
+type: Opaque
+data:
+    username: dxNlcm5hbwu=
+    password: cGFxc3dvcmQ=
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    lables:
+        app: mongo-express
+spec:
+    containers:
+       - name: mongo-express
+         image: mongo-express
+         ports:
+         - containerPorts: 8081
+         env:
+          - name: ME_CONFIG_MONGODB_ADMINUSERNAME
+              valueFrom:
+                 sercetKeyRef:
+                 name: mongodb-secret
+                 key: username
+          - name: ME_CONFIG_MONGODB_ADMINPASSWORD
+                valueFrom:
+                   sercetKeyRef:
+                   name: mongodb-secret
+                   key: password
+          - name: ME_CONFIG_MONGODB_SERVER
+                valueFrom:
+                    configMapKeyRef:
+                        name: mongodb-configmap
+                        key: db_host
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: mongodb-config-map
+data:
+    db_host: mongodb-service
+---
+apiVersion: v1
+kind: sercet
+metadata:
+    name: mongobd-sercet
+data:
+    username: hello
+    password: password
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: mongodb-server
+    lables:
+    app: mongodb-server
+spec:
+    replicas: 4
+    selector:
+        matchLables: 
+            app: mongodb-server
+template:
+    metadata:
+        name:
+        app: mongodb-server
+spec:
+    containers:
+        - name: mongodb-container
+          image: mongodb
+          ports:
+            - containerPort: 8000
+          volumeMounts:
+            - name: mongodb-configmap-file
+              mountPath: /ragesh/config
+            - name: mongodb-secret-file
+              mouthPath: /ragesh/secret
+              readOnly: true         
+    volumes:
+        - name: mongodb-configmap-file
+            configMap:
+                name: mongodb-config-map
+        - name: mongodb-secret-file
+            secret:
+                sercetName: mongobd-sercet
+        
+
+
