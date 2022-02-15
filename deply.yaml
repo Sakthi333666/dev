@@ -1,0 +1,25 @@
+#writing with mistake
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: nginx
+    lables:
+      app: nginx
+spec:
+  replicas: 2
+  selectors:
+    matchLables:
+      app: nginx
+template:
+  metadata:
+    name: nginx
+    app: nginx
+  spec:
+    containerName:
+        name: nginx-container
+      - image: nginx
+    ports:
+      - containerPort: 80
+       
+
+    
