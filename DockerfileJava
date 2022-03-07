@@ -1,0 +1,15 @@
+#for java 8 
+FROM open jdk:8-jdk alpine
+FROM adoptopenjdk/openjdk11
+
+#Maven build refer > final name
+ARG JAR_FILE= /target/spring-boot-web.jar
+
+#CD /opt/app
+WORKDIR /opt/app
+
+#cp target/spring-boot-web.jar /opt/app/app.jar
+COPY ${JAR_FILE} app.jar
+
+#java -jar /opt/app/app.jar
+ENTRYPOINT [ "java","-jar","app.jar" ]
