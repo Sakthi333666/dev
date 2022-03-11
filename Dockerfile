@@ -16,3 +16,4 @@ COPY  index.html /var/www/html/index.html
 EXPOSE 80
 
 ENTRYPOINT apachectl -D FOREGROUND
+

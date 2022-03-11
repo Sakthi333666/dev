@@ -1,5 +1,6 @@
 #for java 8 
 FROM open jdk:8-jdk alpine
+
 FROM adoptopenjdk/openjdk11
 
 #Maven build refer > final name
