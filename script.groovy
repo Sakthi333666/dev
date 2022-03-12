@@ -6,8 +6,9 @@ def TestApp(){
     echo 'testing the application from the script.groovy'
 }
 
-def DeplyApp(){
+def DeployApp(){
     echo 'deploy the application from the script.groovy'
+    echo "deploying the version ${params.VERSION}"
 }
 
 return this

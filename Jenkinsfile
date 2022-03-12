@@ -35,8 +35,9 @@ pipeline{
         }
         stage('deploying'){
             steps{
-                echo 'deploying the application......'
-                echo "deploying build version ${params.VERSION}"
+                script{
+                    gv.DeployApp()
+                }
             }
         }    
     }
