@@ -1,8 +1,8 @@
 pipeline{
     agent any
     parameters{
-        choice(name:'VERSION',choice:['1.1.1','1.1.2','1.1.3'],description:'Project version')
-        booleanParam(name:'executeTest',defaultValue: true,description:'Skip the steps')
+        choice(name:'VERSION', choices :['1.1.1', '1.1.2', '1.1.3'], description:' Project version')
+        booleanParam(name: 'executeTest' ,defaultValue: true, description: 'Skip the steps')
     }
     stages{
         stage('build'){
