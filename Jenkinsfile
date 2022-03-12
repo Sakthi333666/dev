@@ -1,3 +1,4 @@
+def gv
 pipeline{
     agent any
     parameters{
@@ -6,9 +7,18 @@ pipeline{
         booleanParam(name: 'executeTest' ,defaultValue: true, description: 'Skip the steps')
     }
     stages{
+        stage("init"){
+            steps{
+                script{
+                    gv = load "script.groovy"
+                }
+            }
+        }
         stage('build'){
             steps{
-                echo 'Building the application.......'
+                script{
+                    gv.buildApp()
+                }
             }
         }
         stage('testing'){
