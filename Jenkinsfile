@@ -28,7 +28,9 @@ pipeline{
                 }
             }
             steps{
-                echo 'testing the application......'
+                script{
+                    gv.TestApp()
+                }
             }
         }
         stage('deploying'){
